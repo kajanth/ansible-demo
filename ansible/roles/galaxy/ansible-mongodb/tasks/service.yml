@@ -1,6 +1,0 @@
----
-- name: ensure MOngoDB starts every reboot
-  service:
-      name: mongod
-      state: started
-      enabled: yes
