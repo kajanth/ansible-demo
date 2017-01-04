@@ -1,0 +1,4 @@
+#Ansible galaxy, syntax example.
+
+# - src: https://github.com/bennojoy/nginx.git
+#   version: master

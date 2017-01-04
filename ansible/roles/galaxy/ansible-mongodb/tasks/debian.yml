@@ -1,0 +1,106 @@
+# tasks file for mongodb
+---
+
+- name: Add MongoDB 3.2 repositories
+  apt_repository:
+      repo: 'deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse'
+      state: present
+
+- name: Add APT key
+  apt_key: >
+    keyserver="{{mongodb_apt_key_url}}"
+    id="{{mongodb_apt_key_id}}"
+
+
+- name: Update apt cache if needed.
+  apt: update_cache=yes cache_valid_time=3600
+
+- name: install MongoDB
+  apt:
+      name: mongodb-org
+      state: latest
+      update_cache: yes
+  register: mongodb_installation
+  sudo: yes
+
+- name: Creates  directory
+  file:
+      path={{ mongodb_dbpath }} state=directory
+      owner=mongodb
+      group=mongodb
+
+- name: Creates /var/run/mongodb  directory
+  file:
+      path=/var/run/mongodb state=directory
+      owner=mongodb
+      group=mongodb
+
+- name: Install sysfsutils package
+  apt:
+      name: sysfsutils
+      state: present
+  when: ansible_os_family == 'Debian' and mongodb_disable_thp
+
+- name: Create /etc/sysfs.d directory.
+  file:
+    path: /etc/sysfs.d
+    group: root
+    state: directory
+    mode: 0755
+    owner: root
+  when: ansible_os_family == 'Debian' and mongodb_disable_thp
+
+- name: Create sysfs config
+  copy:
+    src: hugepages.conf
+    dest: /etc/sysfs.d/hugepages.conf
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_os_family == 'Debian' and mongodb_disable_thp
+  notify: restart_sysfsutils
+
+
+- name: Install PIP
+  apt:
+      package: python-pip
+      state:   present
+
+- name: Install pymongo
+  pip:
+      name: pymongo
+
+- name: ensure MOngoDB starts every reboot
+  service:
+      name: mongod
+      state: started
+      enabled: yes
+
+- name: Create user admin on admin DB
+  mongodb_user:
+      database: admin
+      name: "{{ mongodb_admin_user }}"
+      password: "{{ mongodb_admin_pass }}"
+      roles: userAdminAnyDatabase
+      state: present
+  when: mongodb_installation | changed
+
+- name: Copy mongo conf file.
+  template:
+      src: mongod.conf
+      dest: /etc/mongod.conf
+  notify: restart_mongod
+
+- name: Create user admin on a non admin DB.
+  mongodb_user:
+      database: "{{ mongodb_database }}"
+      name: "{{ mongodb_user }}"
+      password: "{{ mongodb_pass }}"
+      roles: "{{  mongodb_user_role }}"
+      state: "{{ mongodb_user_state }}"
+      #To authenticate to mongodb admin.
+      login_host: "{{ mongodb_admin_host }}"
+      login_user: "{{ mongodb_admin_user }}"
+      login_password: "{{ mongodb_admin_pass }}"
+      login_port: "{{ mongodb_admin_host_port }}"
+  when: mongodb_installation | changed

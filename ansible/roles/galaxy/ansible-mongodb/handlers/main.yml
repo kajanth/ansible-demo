@@ -1,0 +1,7 @@
+---
+# handlers file for mongodb-ubuntu
+- name: restart_sysfsutils
+  service: name=sysfsutils state=restarted
+
+- name: restart_mongod
+  service: name=mongod state=restarted

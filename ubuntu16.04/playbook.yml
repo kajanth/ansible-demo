@@ -1,0 +1,8 @@
+---
+- name: Ubuntu 16.04 Ansible playbook
+  hosts: all
+  become: yes
+
+  roles:
+     #- { role: ../ansible/roles/galaxy/<rolename> } #example of Ansible-Galaxy
+     - { role: ../ansible/roles/base }

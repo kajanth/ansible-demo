@@ -1,0 +1,49 @@
+---
+
+- name: Add MongoDB gpg rpm key.
+  rpm_key: key=https://www.mongodb.org/static/pgp/server-3.2.asc
+           state=present
+           validate_certs=no
+
+
+- copy: src=mongodb-org-3.2.repo dest=/etc/yum.repos.d/mongodb-org-3.2.repo
+
+- name: MongoDB 3.2 installation.
+  yum: name=mongodb-org state=latest
+  register: mongodb_installation
+
+- name: Install pymongo
+  pip:
+      name: pymongo
+
+
+- include: service.yml
+
+- name: Create user admin on admin DB
+  mongodb_user:
+      database: admin
+      name: "{{ mongodb_admin_user }}"
+      password: "{{ mongodb_admin_pass }}"
+      roles: userAdminAnyDatabase
+      state: present
+  when: mongodb_installation | changed
+
+- name: Copy mongo conf file.
+  template:
+      src: mongod.conf
+      dest: /etc/mongod.conf
+  notify: restart_mongod
+
+- name: Create user admin on a non admin DB.
+  mongodb_user:
+      database: "{{ mongodb_database }}"
+      name: "{{ mongodb_user }}"
+      password: "{{ mongodb_pass }}"
+      roles: "{{  mongodb_user_role }}"
+      state: "{{ mongodb_user_state }}"
+      #To authenticate to mongodb admin.
+      login_host: "{{ mongodb_admin_host }}"
+      login_user: "{{ mongodb_admin_user }}"
+      login_password: "{{ mongodb_admin_pass }}"
+      login_port: "{{ mongodb_admin_host_port }}"
+  when: mongodb_installation | changed

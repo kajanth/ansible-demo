@@ -1,0 +1,10 @@
+*.env/
+*.spec
+*.tar.gz
+*.box
+*.rpm
+*.deb
+*.vagrant/
+testing/.vagrant/
+env/
+!/.gitignore
