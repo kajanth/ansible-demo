@@ -80,7 +80,7 @@ Add new module into the playobook i.e CentOS playoobook.
   roles:
      #- { role: ../ansible/roles/galaxy/<rolename> } #example of Ansible-Galaxy
      - { role: ../ansible/roles/base }
-      - { role: ../ansible/roles/<customrolename> }
+     - { role: ../ansible/roles/<customrolename> }
 
 ```     
 
