@@ -34,7 +34,9 @@ end
 #config.vm.provision "shell", path: "net.sh"
 
 #This is required to fix a bug...
-config.vm.provision "shell", inline: "sudo nmcli connection reload && sudo systemctl restart network.service"
+config.vm.provision "shell", inline: "sudo nmcli connection reload \
+&& sudo systemctl restart network.service && systemctl stop firewalld \
+&& systemctl disable firewalld"
 
 end
 

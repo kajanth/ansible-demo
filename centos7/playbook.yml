@@ -6,3 +6,4 @@
   roles:
      #- { role: ../ansible/roles/galaxy/<rolename> } #example of Ansible-Galaxy
      - { role: ../ansible/roles/base }
+     - { role: ../ansible/roles/firewall }
