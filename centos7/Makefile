@@ -1,5 +1,5 @@
 #Authored by Phillip Bailey
-.PHONY: all up  ssh d g update
+.PHONY: all up stop ssh d g update test
 
 ANSIBLE_GALAXY_ROLES_PATH = ../ansible/roles/galaxy
 
@@ -10,18 +10,22 @@ up: ## Vagrant up.
 	vagrant up
 	vagrant provision
 
-ssh:
-	vagrant ssh
 
 stop: ## Stops the vagrant machine
 	vagrant halt
 
+ssh: ## ssh
+	vagrant ssh
+
 d: ## Vagrant destroy.
 	vagrant destroy -f
 	rm -rf .vagrant/
-
+#
 g: ## Ansible-galaxy pull and installs roles from galaxy.ansible.com
 	ansible-galaxy install -r requirements.yml -p $(ANSIBLE_GALAXY_ROLES_PATH)
-
+#
 update: ## Updates the box that is in use in the current Vagrant environment.
 		vagrant box update
+
+test: ## Ansible Check Mode (“Dry Run”)
+		ansible-playbook playbook.yml --check
